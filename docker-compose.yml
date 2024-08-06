@@ -1,0 +1,59 @@
+version: '3.9'
+services:
+  postgres:
+    build: 
+      context: .
+      dockerfile: Dockerfile.postgres
+    image: ubi18-postgresql15:1.0
+    container_name: postgres
+    restart: always
+    networks:
+      - postgres-network
+    # Используем bind mount для подключения каталога данных и конфигурации к хосту
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql
+      - ./postgresql/log:/var/log/postgresql
+      - ./postgresql/etc:/etc/postgresql
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: P@ssw0rd
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  wikijs:
+    build: 
+      context: .
+      dockerfile: Dockerfile.wikijs
+    image: ubi18-wikijs-2.5.300:1.00
+    container_name: wikijs
+    depends_on:
+      - postgres
+    restart: always
+    networks:
+      - postgres-network
+      - nginx-network
+
+  nginx:
+    build: 
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: ubi18-nginx:1.0
+    container_name: nginx
+    depends_on:
+      - wikijs
+    restart: always
+    volumes:
+      - ./nginx/default:/etc/nginx/sites-available/default
+    ports:
+      - "80:80"
+    networks:
+      - nginx-network
+
+networks:
+  postgres-network:
+    driver: bridge
+  nginx-network:
+    driver: bridge

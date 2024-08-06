@@ -1,0 +1,14 @@
+FROM registry.astralinux.ru/library/astra/ubi18:1.8.1-mg13.3.0
+
+RUN groupadd -g 1111 postgres && useradd -u 1111 -g 1111 -d /var/lib/postgresql -s /bin/bash postgres
+
+RUN apt-get update && \
+    apt-get install -y postgresql-15 && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY ./postgresql/entrypoint.sh /usr/bin/entrypoint.sh
+USER postgres
+
+STOPSIGNAL SIGINT
+
+ENTRYPOINT ["/usr/bin/entrypoint.sh"]

@@ -1,0 +1,20 @@
+FROM registry.astralinux.ru/library/astra/ubi18-nodejs:1.8.1-mg13.3.0
+
+RUN apt-get update && apt install -qy wget
+
+RUN mkdir ./wiki && chown 1000:1000 ./wiki && chmod 2775 ./wiki 
+
+USER node
+
+RUN cd /tmp && wget https://github.com/requarks/wiki/releases/download/v2.5.300/wiki-js.tar.gz
+
+RUN tar xzf /tmp/wiki-js.tar.gz --no-same-owner --no-same-permissions -C /wiki && cd /wiki 
+
+COPY ./wikijs/config.yml /wiki
+
+WORKDIR /wiki
+
+ENTRYPOINT ["node", "/wiki/server"]
+
+
+
