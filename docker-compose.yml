@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   postgres:
     build: 
@@ -9,7 +8,6 @@ services:
     restart: always
     networks:
       - postgres-network
-    # Используем bind mount для подключения каталога данных и конфигурации к хосту
     volumes:
       - ./postgresql/data:/var/lib/postgresql
       - ./postgresql/log:/var/log/postgresql
